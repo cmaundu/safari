@@ -122,19 +122,19 @@ public class Courier {
         this.phone = phone;
     }
 
-    public String getOther_name() {
+    public String getOtherName() {
         return otherName;
     }
 
-    public void setOther_name(String other_name) {
+    public void setOthername(String other_name) {
         this.otherName = other_name;
     }
 
-    public String getWeb_url() {
+    public String getUrl() {
         return url;
     }
 
-    public void setWeb_url(String web_url) {
+    public void setUrl(String web_url) {
         this.url = web_url;
     }
 

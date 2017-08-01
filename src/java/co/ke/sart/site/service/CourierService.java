@@ -27,7 +27,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class CourierService {
 
-        
     private static String URL_SERVER = "https://api.aftership.com/";
     private static String VERSION_API = "v4";
 
@@ -35,18 +34,12 @@ public class CourierService {
     private String apiHost;
     private String apiVersion;
 
-    public CourierService(String keyAPI) {
-        this.keyAPI = keyAPI;
+    public CourierService() {
+        this.keyAPI = "8933eb4b-5a74-4051-948b-a4defbacd857";
         this.apiHost = URL_SERVER;
         this.apiVersion = VERSION_API;
     }
 
-    public CourierService(String keyAPI, String apiHost, String apiVersion) {
-        this.keyAPI = keyAPI;
-        this.apiHost = apiHost;
-        this.apiVersion = apiVersion;
-    }    
-    
     /**
      * make a request to the HTTP API of Aftership
      *
@@ -63,11 +56,8 @@ public class CourierService {
      *
      */
     public JSONObject request(String method, String url, JSONObject body)
-            throws AftershipAPIException, IOException, ParseException, JSONException {
-        
+            throws IOException, ParseException, JSONException {
 
-    
-    
         BufferedReader rd;
         StringBuilder sb;
         OutputStreamWriter wr;
@@ -109,6 +99,34 @@ public class CourierService {
     }
 
     /**
+     * Check the status of a http response and if the status is an error throws
+     * an exception
+     *
+     * @param status Status of the connection response
+     * @exception AftershipAPIException A customize exception with a message
+     * depending of the status error
+     *
+     */
+    public void checkAPIResponse(int status, HttpURLConnection connection)
+            throws IOException, ParseException, JSONException {
+
+        if (status > 201) {
+
+            BufferedReader rd;
+            StringBuilder sb;
+            String message = "";
+            String type = "";
+            rd = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
+            sb = new StringBuilder();
+            String line;
+            while ((line = rd.readLine()) != null) {
+                sb.append(line + '\n');
+            }
+        }
+
+    }
+
+    /**
      * Return a list of couriers supported by AfterShip along with their names,
      * URLs and slugs
      *
@@ -118,23 +136,26 @@ public class CourierService {
      * @throws java.io.IOException If there is a problem with the connection
      * @throws java.text.ParseException If the response can not be parse to
      * JSONObject
-    *
+     *
      */
-    public List<Courier> getAllCouriers() throws AftershipAPIException, IOException, ParseException, JSONException {
+    public List<Courier> getAllCouriers() {
+        try {
+            JSONObject response = this.request("GET", "/couriers/all", null);
 
-        JSONObject response = this.request("GET", "/couriers/all", null);
+            JSONArray couriersJSON = response.getJSONObject("data").getJSONArray("couriers");
+            List<Courier> couriers = new ArrayList<Courier>(couriersJSON.length());
 
-        JSONArray couriersJSON = response.getJSONObject("data").getJSONArray("couriers");
-        List<Courier> couriers = new ArrayList<Courier>(couriersJSON.length());
+            JSONObject element;
 
-        JSONObject element;
+            for (int i = 0; i < couriersJSON.length(); i++) {
+                element = couriersJSON.getJSONObject(i);
 
-        for (int i = 0; i < couriersJSON.length(); i++) {
-            element = couriersJSON.getJSONObject(i);
-
-            Courier newCourier = new Courier(element);
-            couriers.add(newCourier);
+                Courier newCourier = new Courier(element);
+                couriers.add(newCourier);
+            }
+            return couriers;
+        } catch (IOException | ParseException | JSONException e) {
         }
-        return couriers;
+        return new ArrayList<Courier>();
     }
 }

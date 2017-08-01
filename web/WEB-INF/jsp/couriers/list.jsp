@@ -17,7 +17,7 @@
                             <td>${courier.name}</td>
                             <td>${courier.phone}</td>
                             <td>${courier.otherName}</td>
-                            <td>${pat.url}</td>
+                            <td>${courier.url}</td>
                         </tr>
                     </c:forEach>
                 </table>
