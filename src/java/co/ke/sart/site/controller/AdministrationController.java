@@ -23,6 +23,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
+import net.sf.ehcache.Cache;
+import net.sf.ehcache.CacheManager;
+
 
 @WebController
 @EnableGlobalMethodSecurity(prePostEnabled = true)

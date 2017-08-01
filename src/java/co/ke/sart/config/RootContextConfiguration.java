@@ -112,23 +112,6 @@ public class RootContextConfiguration implements
         return messageSource;
     }
 
-    /*
-    @Bean
-    public LocalValidatorFactoryBean localValidatorFactoryBean() {
-        LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
-        validator.setValidationMessageSource(this.messageSource());
-        return validator;
-    }*/
-
- /*
-    @Bean
-    public MethodValidationPostProcessor
-            methodValidationPostProcessor() {
-        MethodValidationPostProcessor processor
-                = new MethodValidationPostProcessor();
-        processor.setValidator(this.localValidatorFactoryBean());
-        return processor;
-    }*/
     @Bean
     public ObjectMapper objectMapper() {
         ObjectMapper mapper = new ObjectMapper();
@@ -138,6 +121,16 @@ public class RootContextConfiguration implements
                 false);
         return mapper;
     }
+    
+    @Override
+    public void contextInitialized(ServletContextEvent sce) {
+        ServletContext ctx = sce.getServletContext();
+        CacheManager singletonManager = CacheManager.create();
+        Cache memoryOnlyCache = new Cache("dbCache", 100, false, true, 86400,86400);
+        singletonManager.addCache(memoryOnlyCache);
+        cache = singletonManager.getCache("dbCache");       
+        ctx.setAttribute("dbCache", cache );           
+    }    
 
     @Bean
     public Jaxb2Marshaller jaxb2Marshaller() {
@@ -146,18 +139,10 @@ public class RootContextConfiguration implements
         return marshaller;
     }
 
-    /*@Bean
-    public DataSource sartDataSource() {
-        JndiDataSourceLookup lookup
-                = new JndiDataSourceLookup();
-        DataSource ds
-                = lookup.getDataSource("jdbc/safari");
-        return ds;
-    }*/
+
     @Bean(name = "dataSource")
     public DataSource sartDataSource() {
         SartDataSource dmds = new SartDataSource();
-        //DriverManagerDataSource dmds = new DriverManagerDataSource(dbUrl, dbUserName, dbPassword);
 
         System.out.println("Driver: " + dbDriver + " - URL: " + dbUrl + " Username: " + dbUserName);
         dmds.setDriverClassName(dbDriver);
