@@ -26,16 +26,33 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-@RestController("api/report")
+@RestController("api")
 public class ReportRestController {
 
     @Autowired
     ReportService reportService;
 
-    @RequestMapping(value = "list", method = RequestMethod.GET)
+    @RequestMapping(value = "report/list", method = RequestMethod.GET)
     public Map<String, Object> list(Model model) {
 
         Map<String, Object> pays = reportService.getPayments();
         return pays;
     }
+    
+    @RequestMapping(value = "location/list", method = RequestMethod.GET)
+    public String getLocation() {
+        try {
+            Client client = ClientBuilder.newClient();
+            WebTarget myResource = client.target("https://api.aftership.com/v4");
+            MultivaluedMap<String, Object> myHeaders = new MultivaluedHashMap<>();
+            myHeaders.add("aftership-api-key", "8933eb4b-5a74-4051-948b-a4defbacd857");
+            String response = myResource.request(MediaType.APPLICATION_JSON)
+                    .headers(myHeaders)
+                    .get(String.class);
+            return response;
+        } catch (Exception e) {
+
+        }
+        return "";
+    }    
 }
