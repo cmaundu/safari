@@ -24,7 +24,6 @@ import co.ke.sart.site.form.VitalForm;
 import co.ke.sart.site.model.Patient;
 import co.ke.sart.site.model.Request;
 import co.ke.sart.site.repository.VitalRepository;
-import co.ke.sart.site.service.CacheService;
 import co.ke.sart.site.service.RequestService;
 import co.ke.sart.site.utils.FormAction;
 import co.ke.sart.site.utils.RecordStatus;
@@ -49,9 +48,6 @@ public class RequestController {
 
     @Autowired
     RequestService requestService;
-    
-    @Autowired
-    CacheService cacheService;
 
     @RequestMapping(value = {"{attendanceID}/{requestID}/charge/add/{chargeID}"}, method = RequestMethod.GET)
     public String addCharge(Model model, @PathVariable("attendanceID") int attendanceID, @PathVariable("requestID") int requestID, @PathVariable("chargeID") int chargeID) {
@@ -473,7 +469,7 @@ public class RequestController {
     public String viewRequest(Model model, @PathVariable("requestID") int requestID) {
 
         //model.addAllAttributes(this.requestService.getRequestDetailsForDisplay(requestID));
-        model.addAllAttributes(this.cacheService.getRequestDetailsCache(requestID));
+        model.addAllAttributes(this.requestService.getRequestDetailsForDisplay(requestID));
 
         System.out.println("Called: Request ID: " + requestID);
         return "/request/view";

@@ -122,16 +122,7 @@ public class RootContextConfiguration implements
         return mapper;
     }
     
-    @Override
-    public void contextInitialized(ServletContextEvent sce) {
-        ServletContext ctx = sce.getServletContext();
-        CacheManager singletonManager = CacheManager.create();
-        Cache memoryOnlyCache = new Cache("dbCache", 100, false, true, 86400,86400);
-        singletonManager.addCache(memoryOnlyCache);
-        cache = singletonManager.getCache("dbCache");       
-        ctx.setAttribute("dbCache", cache );           
-    }    
-
+ 
     @Bean
     public Jaxb2Marshaller jaxb2Marshaller() {
         Jaxb2Marshaller marshaller = new Jaxb2Marshaller();

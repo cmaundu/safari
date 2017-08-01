@@ -21,9 +21,9 @@ public class UserServiceTest {
     @Autowired
     UserService userService;
 
-    @Test
+    
     public final void whenUserCreatedThenUserNameIsProvided() {
-        UserForm userForm = userService.prepareRoleForm(0, FormAction.FULFIL);
+        UserForm userForm = userService.prepareUserForm(0, FormAction.FULFIL);
 
         UserPrincipal user = new UserPrincipal();
         user.setDocNumber("9990000");
