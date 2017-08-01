@@ -56,7 +56,12 @@
                     <div class="sidemenutxt"> <spring:message code="sart.title.dashboard" /> </div>
                 </div>
             </a>
-
+            <a href="<c:url value="/courier/list" />" class="nodeco">
+                <div class="sidemenuitem">
+                    <div class="sidemenuimg"> <img src="<c:url value="/resources/images/icon_three_dot.png" />" /> </div>
+                    <div class="sidemenutxt"> <spring:message code="sart.title.courier" /> </div>
+                </div>
+            </a>
             <a href="<c:url value="/patient/" />" class="nodeco">
                 <div class="sidemenuitem">
                     <div class="sidemenuimg"> <img src="<c:url value="/resources/images/icon_three_dot.png" />" /> </div>
