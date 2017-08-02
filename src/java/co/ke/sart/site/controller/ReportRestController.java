@@ -26,20 +26,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-@RestController("api")
+@RestController
 public class ReportRestController {
 
     @Autowired
     ReportService reportService;
 
-    @RequestMapping(value = "report/list", method = RequestMethod.GET)
+    @RequestMapping(value = "api/report/list", method = RequestMethod.GET)
     public Map<String, Object> list(Model model) {
 
         Map<String, Object> pays = reportService.getPayments();
         return pays;
     }
     
-    @RequestMapping(value = "location/list", method = RequestMethod.GET)
+    @RequestMapping(value = "api/location/list", method = RequestMethod.GET)
     public String getLocation() {
         try {
             Client client = ClientBuilder.newClient();
