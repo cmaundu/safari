@@ -16,9 +16,11 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 /**
@@ -139,6 +141,7 @@ public class CourierService {
      * JSONObject
      *
      */
+    @Cacheable("couriers")
     public List<Courier> getAllCouriers() {
         try {
             JSONObject response = this.request("GET", "/couriers/all", null);

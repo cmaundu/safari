@@ -47,6 +47,7 @@ import javax.persistence.ValidationMode;
 import javax.sql.DataSource;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Properties;
@@ -63,7 +64,13 @@ import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cache.concurrent.ConcurrentMapCache;
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
+import org.springframework.cache.ehcache.EhCacheCacheManager;
+import org.springframework.cache.ehcache.EhCacheManagerFactoryBean;
+import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.ClassPathResource;
@@ -98,6 +105,10 @@ public class RootContextConfiguration implements
     @Autowired
     private Environment env;
 
+    
+    /**
+     * Database configuration.
+     */
     @Value("${spring.datasource.driver-class-name}")
     private String dbDriver;
     @Value("${spring.datasource.url}")
@@ -109,6 +120,11 @@ public class RootContextConfiguration implements
 
     private static final Logger log = LogManager.getLogger();
 
+    
+    /***
+     * Message bundles for various languages retrieval bean. 
+     * @return 
+     */
     @Bean
     public MessageSource messageSource() {
         ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
@@ -152,7 +168,23 @@ public class RootContextConfiguration implements
         return dmds;
     }
 
+    
+	@Bean
+	public CacheManager cacheManager() {
+		return new EhCacheCacheManager(ehCacheCacheManager().getObject());
+	}
 
+        /***
+         * Bean for initializing EH Cache.
+         * @return 
+         */
+	@Bean
+	public EhCacheManagerFactoryBean ehCacheCacheManager() {
+		EhCacheManagerFactoryBean cmfb = new EhCacheManagerFactoryBean();
+		cmfb.setConfigLocation(new ClassPathResource("co/ke/sart/config/ehcache.xml"));
+		cmfb.setShared(true);
+		return cmfb;
+	}
 
 
     @Bean(name = "entityManagerFactory")
