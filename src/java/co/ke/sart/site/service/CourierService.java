@@ -15,6 +15,7 @@ import java.net.URL;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -158,4 +159,22 @@ public class CourierService {
         }
         return new ArrayList<Courier>();
     }
+
+    /**
+     * Method used to search a Courier
+     *
+     * @param searchString - the value to search.
+     * @return List of Couriers.
+     */
+    public List<Courier> searchCourier(String searchString) {
+        List<Courier> couriers = this.getAllCouriers();
+        
+        couriers = couriers.stream().parallel()
+                .filter(c -> c.getName().contains(searchString) 
+                        || c.getOtherName().contains(searchString) || c.getSlug().contains(searchString))
+                .collect(Collectors.toList());
+        
+        return couriers;
+    }
+
 }

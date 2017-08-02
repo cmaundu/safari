@@ -63,11 +63,18 @@ import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor;
 import org.springframework.orm.jpa.vendor.Database;
+
+
+/***
+ * Java Web application configuration startup class. 
+ * @author CMaundu
+ */
 
 @Configuration
 @EnableScheduling
@@ -84,6 +91,7 @@ import org.springframework.orm.jpa.vendor.Database;
 )
 @ComponentScan(basePackages = "co.ke.sart.site.controller", excludeFilters = @ComponentScan.Filter({Controller.class, ControllerAdvice.class}))
 @Import({SecurityConfiguration.class})
+@EnableCaching
 public class RootContextConfiguration implements
         AsyncConfigurer, SchedulingConfigurer {
 
