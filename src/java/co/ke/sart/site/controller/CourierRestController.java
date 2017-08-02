@@ -11,21 +11,24 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/***
+/**
+ * *
  * This class provides control logic for rest calls /api/courier/...
+ *
  * @author CMaundu
  */
 @RestController
 public class CourierRestController {
-    
+
     @Autowired
-    CourierService courierService;    
-    
+    CourierService courierService;
+
     @RequestMapping(value = "api/courier/list")
-    public List<Courier> getList(Model model) {
+    public List<Courier> getList() {
         try {
             return this.courierService.getAllCouriers();
         } catch (Exception e) {
@@ -33,4 +36,15 @@ public class CourierRestController {
 
         return null;
     }
+
+    @RequestMapping(value = "api/courier/search/{searchString}")
+    public List<Courier> searchCourier(@PathVariable("searchString") String searchString) {
+        try {
+            return this.courierService.searchCourier(searchString);
+        } catch (Exception e) {
+        }
+
+        return null;
+    }
+
 }
