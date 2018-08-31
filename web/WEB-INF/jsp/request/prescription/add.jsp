@@ -55,7 +55,7 @@
             <div class="req-list-values">
                 <table class="req-list-table">
                     <tbody id="req-list-body">
-                        <tr><th>Name</th><th>Dose</th><th>Quantity</th><th>Comment</th><th></th></tr>
+                        <tr><th>Name</th><th>Dose</th><th>@</th><th>Quantity</th><th>Comment</th><th></th></tr>
 
                         <c:forEach items="${prescriptionForm.prescriptionList}" var="prescriptionItem" varStatus="status">
                             <c:url value="/request/${prescriptionForm.getAttendanceID()}/${prescriptionForm.getRequestID()}/prescription/add/removeitem/${prescriptionItem.rowID}" var="removeitemurl" />
@@ -64,6 +64,7 @@
                                     <form:hidden path="prescriptionList[${status.index}].rowID"/> 
                                     <form:input readonly="true" path="prescriptionList[${status.index}].drugName" /></td> 
                                 <td><form:input path="prescriptionList[${status.index}].dose" /></td>
+                                <td><form:input path="prescriptionList[${status.index}].amount" /></td>
                                 <td><form:input path="prescriptionList[${status.index}].quantity" /></td>
                                 <td><form:textarea rows="1" path="prescriptionList[${status.index}].note" /></td>
                                 <td class="sart-table-button"><input type="submit" formaction="${removeitemurl}" value="Remove" />

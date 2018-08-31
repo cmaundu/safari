@@ -42,13 +42,15 @@ public class PatientService {
     public List<Patient> getPatients() {
         RecordEntity re = new PatientEntity();
         List<Patient> list = new ArrayList<>();
-        this.patientRepository.findAll()
-                .forEach(p -> list.add(this.convert(p)));
+        list = this.patientRepository.findFirst100ByOrderByRowIDDesc()
+                .stream().map(p -> this.convert(p))
+                .collect(Collectors.toList());
+        
+        //this.patientRepository.findAll().forEach(p -> list.add(this.convert(p)));
 
-        List result = list.stream().sorted((o1, o2) -> Integer.compare(o2.getRowID(), o1.getRowID())).
-                collect(Collectors.toList());
+        //List result = list.stream().sorted((o1, o2) -> Integer.compare(o2.getRowID(), o1.getRowID())).collect(Collectors.toList());
 
-        return result;
+        return list;
     }
 
     @Transactional

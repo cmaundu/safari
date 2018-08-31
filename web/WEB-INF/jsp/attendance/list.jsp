@@ -12,26 +12,14 @@
                     <td><a href="<c:url value="/attendance/view/${attendance.getRowID()}" />"> ${attendance.attNumber}</a></td>
                     <td> ${attendance.getAttTypeName()}</td>
                     <td>${attendance.getPaymentMode().getName()}</td>
-                    <td class="sart-att-status-${attendance.getAttStatus()}">${attendance.getAttStatus()}</td>
+                    <td>
+                        <span class="sart-att-status sart-att-status-${attendance.getAttStatus()}">${attendance.getAttStatus()}</span>
+                    </td>
                     <td>${attendance.getInsuranceNumber()}</td>
                     <td>Not Assigned</td>
                     <td>${attendance.getCreatedDate()}</td>
                 </tr>
             </c:forEach>
         </table>
-        <br /><br /><br />
-        <div class="paging">
-            Pages <c:forEach begin="1" end="${attendances.totalPages}" var="i">
-                <c:choose>
-                    <c:when test="${(i - 1) == attendances.number}">${i}</c:when>
-                    <c:otherwise>
-                        <a href="<c:url value="/page/view/32">
-                               <c:param name="paging.page" value="${i}" />
-                               <c:param name="paging.size" value="10" />
-                           </c:url>">${i}</a>
-                    </c:otherwise>
-                </c:choose>&nbsp;
-            </c:forEach>
-        </div>
     </c:otherwise>
 </c:choose>

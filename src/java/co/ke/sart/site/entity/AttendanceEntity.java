@@ -25,7 +25,7 @@ public class AttendanceEntity extends RecordEntity implements Serializable {
     private int attDoc;
     private int paymentTypeID;
     private int closedBy;
-    @Enumerated(EnumType.STRING)
+
     private AttendanceStatus attStatus;
     private int attType;
     private String insuranceNumber;
@@ -74,6 +74,7 @@ public class AttendanceEntity extends RecordEntity implements Serializable {
         this.closedBy = closedBy;
     }
 
+    @Enumerated(EnumType.STRING)
     public AttendanceStatus getAttStatus() {
         return attStatus;
     }

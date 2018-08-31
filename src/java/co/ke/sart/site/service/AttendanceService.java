@@ -158,8 +158,8 @@ public class AttendanceService extends RecordService {
             } else {
                 AttendanceEntity entityLast = entities.get(1);
                 String lastNumber = entityLast.getAttNumber();
-                lastNumber = (lastNumber == null || lastNumber.isEmpty() ) ? "-" : lastNumber;
-                int lastIndex = (lastNumber != null && lastNumber.contains("-"))? lastNumber.lastIndexOf("-"):0;
+                lastNumber = (lastNumber == null || lastNumber.isEmpty()) ? "-" : lastNumber;
+                int lastIndex = (lastNumber != null && lastNumber.contains("-")) ? lastNumber.lastIndexOf("-") : 0;
 
                 if (lastIndex > 5) {
                     lastNumber = lastNumber.substring(lastIndex + 1);
@@ -173,8 +173,9 @@ public class AttendanceService extends RecordService {
                     num = entity.getRowID();
                 }
                 entity.setAttNumber(patEntity.getPatientNumber() + String.format("-%03d", num));
-                this.attendanceRepository.save(entity);
+
             }
+            this.attendanceRepository.save(entity);
         }
 
     }

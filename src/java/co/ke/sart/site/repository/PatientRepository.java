@@ -19,4 +19,5 @@ import org.springframework.data.repository.CrudRepository;
  */
 public interface PatientRepository extends CrudRepository<PatientEntity, Integer>, SearchableRepository<PatientEntity> {
     Page<PatientEntity> findByDocNumberContainingOrSurnameContainingOrForenameContainingOrPatientNumberContainingOrPatientContactContainingAllIgnoreCaseOrderByRowIDDesc(String docNumber,String  surname,String forename, String patientNumber, String patientContact, Pageable pageable);
+    List<PatientEntity> findFirst100ByOrderByRowIDDesc();
 }

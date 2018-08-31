@@ -11,8 +11,10 @@ import co.ke.sart.site.form.AttendanceForm;
 import co.ke.sart.site.form.AttendanceNewForm;
 import co.ke.sart.site.form.PatientForm;
 import co.ke.sart.site.model.Attendance;
+import co.ke.sart.site.model.OpenAttendanceDetails;
 import co.ke.sart.site.model.Patient;
 import co.ke.sart.site.repository.PaymentModeRepository;
+import co.ke.sart.site.repository.ReportRepository;
 import co.ke.sart.site.service.AttendanceService;
 import co.ke.sart.site.service.PatientService;
 import co.ke.sart.site.service.RequestService;
@@ -21,6 +23,7 @@ import java.security.Principal;
 import javax.validation.Valid;
 import org.hibernate.service.spi.InjectService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -41,10 +44,17 @@ public class AttendanceController {
 
     @Autowired
     RequestService requestService;
-    
-    @RequestMapping(value = {"*","**"})
-    public String showAttendances(Model model){
-        model.addAttribute("attendances", this.attendanceService.retriveOpenAttendances());
+
+    @Autowired
+    private ApplicationContext appContext;
+
+    @RequestMapping(value = {"*", "**"})
+    public String showAttendances(Model model) {
+        ReportRepository reportRepository = appContext.getBean("reportRepository", ReportRepository.class);
+        OpenAttendanceDetails openAtts = new OpenAttendanceDetails();
+        openAtts.setOpenAttendances(reportRepository.getOpenAttendances());
+        
+        model.addAttribute("attendances", reportRepository.getOpenAttendances());
         return "attendance/listopen";
     }
 
@@ -57,7 +67,7 @@ public class AttendanceController {
         //model.addAttribute("attendanceTypeLOVs", this.attendanceService.getLovByType("ATTENDANCE_TYPE"));
         return "attendance/add";
     }
-    
+
     @RequestMapping(value = "edit/{rowID}")
     public String editttendance(Model model, @PathVariable("rowID") int rowID) {
         model.addAttribute("attendanceForm", this.attendanceService.prepareAttendanceForm(rowID, 0, FormAction.EDIT));
@@ -66,12 +76,12 @@ public class AttendanceController {
         //model.addAttribute("attendanceNewForm", new AttendanceNewForm());
         //model.addAttribute("attendanceTypeLOVs", this.attendanceService.getLovByType("ATTENDANCE_TYPE"));
         return "attendance/add";
-    }    
+    }
 
-    @RequestMapping(value = {"add/{patientID}","edit/{patientID}"}, method = RequestMethod.POST)
+    @RequestMapping(value = {"add/{patientID}", "edit/{patientID}"}, method = RequestMethod.POST)
     public ModelAndView saveattendance(Principal principal, @Valid @ModelAttribute("attendanceForm") AttendanceForm attendanceForm, BindingResult result, @PathVariable("patientID") int patientID) {
         if (result.hasErrors()) {
-            System.out.println("There are errors"+result.getAllErrors());
+            System.out.println("There are errors" + result.getAllErrors());
             return new ModelAndView("attendance/add");
         }
 
@@ -86,7 +96,7 @@ public class AttendanceController {
         model.addAttribute("attendance", attendance);
         model.addAttribute("patient", this.patientService.getPatient(attendance.getPatientID()));
         model.addAttribute("paymentMode", attendanceService.getPaymentMode(attendance.getPaymentTypeID()));
-        
+
         model.addAttribute("requests", this.requestService.getRequestForDisplay(attendanceID));
 
         return "attendance/view";

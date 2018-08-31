@@ -1,13 +1,8 @@
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@ include file="/WEB-INF/jsp/base.jspf" %>
-<spring:message code="sart.title" var="sartTitle" />
-<mt:master>
-    <jsp:attribute name="content">
-        <div class="att-screen-main">
-            <div class="sart-att-request-list">  
+
+            <div class="sart-record-banner">
                  <span class="sart-title">User List</span>
-                <a href="<c:url value="/administration/user/add" />" class="btn btn-result" data-toggle="modal" data-target="#myModal"><i class="fa fa-plus"></i>New User</a>
-                <a href="<c:url value="/administration/roles" />" class="btn btn-view" data-toggle="modal" data-target="#myModal"><i class="fa fa-plus"></i>Roles</a>
+                <a href="<c:url value="/administration/user/add" />" class="btn btn-result" data-toggle="modal" data-target="#myModal"><i class="fa fa-plus"></i> New User</a>
+                </div>
                 <table class="sart-att-req-table">
                     <tr><th></th><th></th><th>User Name</th><th>Roles</th><th>Status</th><th>Full Names</th><th>Emp #</th><th>Last Login</th><th>Created On</th></tr>
 
@@ -22,11 +17,9 @@
                             <td>${item.getLastLoginDateTime()}</td>
                             <td>${item.getCreatedDateTime()}</td></tr>
                         </c:forEach>
-                </table>
-            </div>           
-        </div>
-    </jsp:attribute>
-</mt:master>
+                </table>      
+
+
 
 
 

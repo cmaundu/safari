@@ -35,17 +35,34 @@
             </div>  
             <div class="sart_req_view">
                 <div class="sart-att-action-buttons">
+                    <sec:authorize access="hasRole('ROLE_ADD_VITAL')">
                     <a class="btn btn-primary" data-toggle="modal" data-target="#myModal" href="${addvital}" ><i class="fa fa-plus"></i> Vital</a>    
+                    </sec:authorize>
+                    <sec:authorize access="hasRole('ROLE_ADD_OBSV')">
                     <a class="btn btn-primary" data-toggle="modal" data-target="#myModal" href="${addobservation}" ><i class="fa fa-plus"></i> Doctor's Observation</a>    
+                    </sec:authorize>
+                    <sec:authorize access="hasRole('ROLE_ADD_DX')">
                     <a class="btn btn-primary" data-toggle="modal" data-target="#myModal" href="${adddiagnosis}" ><i class="fa fa-plus"></i> Diagnosis</a>    
+                    </sec:authorize>
+                    <sec:authorize access="hasRole('ROLE_ADD_LABREQ')">
                     <a class="btn btn-primary" data-toggle="modal" data-target="#myModal" href="${addlabtest}" ><i class="fa fa-plus"></i> Lab Request</a>    
+                    </sec:authorize>
+                    <sec:authorize access="hasRole('ROLE_ADD_PROC')">
                     <a class="btn btn-primary" data-toggle="modal" data-target="#myModal" href="${addprocedure}" ><i class="fa fa-plus"></i> Procedure</a>    
+                    </sec:authorize>
+                    <sec:authorize access="hasRole('ROLE_ADD_RX')">
                     <a class="btn btn-primary" data-toggle="modal" data-target="#myModal" href="${addprescription}" ><i class="fa fa-plus"></i> Prescription</a>    
+                    </sec:authorize>
+                    <sec:authorize access="hasRole('ROLE_ADD_RAD')">
                     <a class="btn btn-primary" data-toggle="modal" data-target="#myModal" href="${addradiology}" ><i class="fa fa-plus"></i> Radiology</a>    
-
+</sec:authorize>
+                    <sec:authorize access="hasRole('ROLE_ADD_CHARGE')">
                     <a class="btn btn-primary" data-toggle="modal" data-target="#myModal" href="${addcharge}" ><i class="fa fa-plus"></i> Charge</a>    
+                    </sec:authorize>
+                    <sec:authorize access="hasRole('ROLE_ADD_DISCHARGE')">
                     <a class="btn btn-primary" data-toggle="modal" data-target="#myModal" href="${adddischarge}"><i class="fa fa-plus"></i> Discharge</a>        
-
+                    </sec:authorize>
+                    <sec:authorize access="hasRole('ROLE_VIEW_PRINTINV')">
                     <a href="#" class="btn btn-primary" data-toggle="modal" data-target="#myModal" onclick="javascript:showrequestview(0, '${printinvoice}');"><i class="fa fa-plus"></i> Print Invoice/Receipt</a>        
 
                     <a href="#" class="btn btn-primary" data-toggle="modal" data-target="#myModal" onclick="javascript:showrequestview(0, '${printlab}');"><i class="fa fa-plus"></i> Print Lab</a>     
@@ -55,6 +72,7 @@
                     <a href="#" class="btn btn-primary" data-toggle="modal" data-target="#myModal" onclick="javascript:showrequestview(0, '${printradiology}');"><i class="fa fa-plus"></i> Print Radiology</a>        
 
                     <a href="#" class="btn btn-primary" data-toggle="modal" data-target="#myModal" onclick="javascript:showrequestview(0, '${printprocedure}');"><i class="fa fa-plus"></i> Print Procedure</a>        
+</sec:authorize>
 
                 </div>
             </div>

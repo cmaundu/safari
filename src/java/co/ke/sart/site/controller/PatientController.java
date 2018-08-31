@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import javax.validation.constraints.NotNull;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -42,6 +43,7 @@ public class PatientController {
     AttendanceService attendanceService;
 
     @RequestMapping(value = {"*","**","/**", "list"}, method = RequestMethod.GET)
+    @PreAuthorize("hasRole('ROLE_VIEW_PAT')")
     public String list(Model model, SearchForm form) {
         List<Patient> patients = patientService.getPatients();
         model.addAttribute("patients", patients);
@@ -67,6 +69,7 @@ public class PatientController {
     }
 
     @RequestMapping(value = "add")
+    @PreAuthorize("hasRole('ROLE_ADD_PAT')")
     public String create(Model model) {
         model.addAttribute("patientForm", new PatientForm());
 
@@ -76,6 +79,7 @@ public class PatientController {
   
 
     @RequestMapping(value = {"add","edit"}, method = RequestMethod.POST)
+    @PreAuthorize("hasRole('ROLE_ADD_PAT')")
     public ModelAndView create(Principal principal, @Valid @ModelAttribute("patientForm") PatientForm patientForm, BindingResult result) {
 
         if (result.hasErrors()) {
@@ -90,6 +94,7 @@ public class PatientController {
     }
     
     @RequestMapping(value = "edit/{rowID}")
+    @PreAuthorize("hasRole('ROLE_EDIT_PAT')")
     public String edit(Model model, @PathVariable("rowID") int rowID) {
         
         Patient patient = this.patientService.getPatient(rowID);
@@ -103,6 +108,7 @@ public class PatientController {
     }    
     
     @RequestMapping(value = "view/{rowID}")
+    @PreAuthorize("hasRole('ROLE_VIEW_PAT')")
     public String view(Model model, Pageable page, @PathVariable("rowID") int rowID) {
         Patient patient = this.patientService.getPatient(rowID);
         model.addAttribute("patient",patient);

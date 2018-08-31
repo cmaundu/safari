@@ -46,6 +46,7 @@ import co.ke.sart.site.repository.PaymentRepository;
 import co.ke.sart.site.repository.PrescriptionRepository;
 import co.ke.sart.site.repository.ProcedureRepository;
 import co.ke.sart.site.repository.RadiologyRepository;
+import co.ke.sart.site.repository.ReportRepository;
 import co.ke.sart.site.repository.RequestRepository;
 import co.ke.sart.site.repository.UserRepository;
 import co.ke.sart.site.repository.VitalRepository;
@@ -66,6 +67,7 @@ import java.util.Optional;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -122,6 +124,9 @@ public class RequestService {
     @Autowired
     AttendanceService attendanceService;
 
+    @Autowired
+    private ApplicationContext appContext;
+
     public ChargeForm prepareChargeForm(ChargeForm chargeForm) {
         chargeForm.setRequestSubTypeLOVs(listOfValueRepository.findByLovTypeOrderByLovVal("CHARGE"));
         System.out.println("Request ID: " + chargeForm.getRequestID());
@@ -160,7 +165,7 @@ public class RequestService {
                 entity.setPaid(true);
             }
         } else {
-            int requestType = this.listOfValueRepository.findByLovTypeAndLovName("REQUEST", "Charge")
+            int requestType = this.listOfValueRepository.findByLovTypeAndLovName("REQUEST", "Charges")
                     .stream()
                     .findFirst()
                     .map(e -> e.getLovID())
@@ -578,7 +583,7 @@ public class RequestService {
         request.setUpdatedBy(user.getRowID());
         request.setChargeable(false);
         this.saveRequest(request);
-this.attendanceService.updateAttendance(request.getAttendanceID(), AttendanceStatus.Active);
+        this.attendanceService.updateAttendance(request.getAttendanceID(), AttendanceStatus.Active);
         diagnosisForm.getDiagnosisList().stream().forEach(d -> {
             d.setAttendanceID(diagnosisForm.getAttendanceID());
             d.setRequestID(request.getRowID());
@@ -586,12 +591,19 @@ this.attendanceService.updateAttendance(request.getAttendanceID(), AttendanceSta
         });
     }
 
+    private List<ListOfValue> getListOfValues(int attendanceID, String lovType) {
+        ReportRepository reportRepository = appContext.getBean("reportRepository", ReportRepository.class);
+        return reportRepository.getListOfValue(lovType, attendanceID);
+    }
+
     public LabTestForm prepareLabTestForm(int attendanceID, int requestID) {
         LabTestForm labTestForm = new LabTestForm();
         labTestForm.setAttendanceID(attendanceID);
         labTestForm.setRequestID(requestID);
         List<LabTest> labTestList = null;
-        labTestForm.setLabTestLOVs(this.listOfValueRepository.findByLovType("LAB_TEST"));
+
+        //labTestForm.setLabTestLOVs(this.listOfValueRepository.findByLovType("LAB_TEST"));
+        labTestForm.setLabTestLOVs(this.getListOfValues(attendanceID, "LAB_TEST"));
         if (requestID > 0) {
             labTestList = this.labTestRepository.findByRequestID(requestID);
             Request request = this.getRequest(requestID);
@@ -605,7 +617,7 @@ this.attendanceService.updateAttendance(request.getAttendanceID(), AttendanceSta
             if (labTestForm.getSelectedLovs() != null) {
                 labTestList.stream().forEach(p -> labTestForm.getSelectedLovs().add(p.getLabTypeLovID()));
             }
-            List<ListOfValue> labtestLovs = this.listOfValueRepository.findByLovType("LAB_TEST");
+            List<ListOfValue> labtestLovs = this.getListOfValues(attendanceID, "LAB_TEST");
             labTestList = labTestList.stream().map(p -> {
                 for (ListOfValue lov : labtestLovs) {
                     if (lov.getLovID() == p.getLabTypeLovID()) {
@@ -648,11 +660,11 @@ this.attendanceService.updateAttendance(request.getAttendanceID(), AttendanceSta
      * diagnosisForm.getDiagnosisList().stream().forEach(d -> createDiagnosis(d,
      * user)); }*
      */
-    public List<LabTest> convertToLabTests(List<Integer> selectedLovs, List<LabTest> tests) {
+    public List<LabTest> convertToLabTests(List<Integer> selectedLovs, List<LabTest> tests,int attendanceID) {
         if (tests == null) {
             tests = new ArrayList<>();
         }
-        List<ListOfValue> lovs = this.listOfValueRepository.findByLovType("LAB_TEST");
+        List<ListOfValue> lovs = this.getListOfValues(attendanceID, "LAB_TEST");
 
         List<Integer> oldLovs = tests.stream().map(p -> p.getLabTypeLovID()).collect(Collectors.toList());
 
@@ -695,6 +707,7 @@ this.attendanceService.updateAttendance(request.getAttendanceID(), AttendanceSta
 
     public void saveLabTest(LabTestForm labTestForm, UserPrincipal user) {
         Request request = null;
+        int attendanceID = labTestForm.getAttendanceID();
         if (labTestForm.getRequestID() > 0) {
             request = getRequest(labTestForm.getRequestID());
         } else {
@@ -702,9 +715,10 @@ this.attendanceService.updateAttendance(request.getAttendanceID(), AttendanceSta
         }
         List<LabTest> oldTests = this.labTestRepository.findByRequestID(labTestForm.getRequestID());
 
-        List<LabTest> labTests = convertToLabTests(labTestForm.getSelectedLovs(), oldTests);
+        List<LabTest> labTests = convertToLabTests(labTestForm.getSelectedLovs(), oldTests, attendanceID);
 
-        List<ListOfValue> testlovs = this.listOfValueRepository.findByLovType("LAB_TEST");
+        List<ListOfValue> testlovs =  this.getListOfValues(attendanceID, "LAB_TEST");
+        //this.listOfValueRepository.findByLovType("LAB_TEST");
 
         for (int i = 0; i < testlovs.size(); i++) {
             int labRowID = testlovs.get(i).getRowID();
@@ -747,7 +761,7 @@ this.attendanceService.updateAttendance(request.getAttendanceID(), AttendanceSta
         request.setChargeable(true);
         request.setAmountCharged(labTests.stream().map(e -> e.getChargeAmount()).reduce(Double.valueOf(0), Double::sum));
         this.saveRequest(request);
-this.attendanceService.updateAttendance(request.getAttendanceID(), AttendanceStatus.Active);
+        this.attendanceService.updateAttendance(request.getAttendanceID(), AttendanceStatus.Active);
         for (LabTest labTest : labTests) {
             labTest.setRequestID(request.getRowID());
             labTest.setAttendanceID(request.getAttendanceID());
@@ -774,11 +788,11 @@ this.attendanceService.updateAttendance(request.getAttendanceID(), AttendanceSta
         procedureForm.setAttendanceID(attendanceID);
         procedureForm.setRequestID(requestID);
         List<Procedure> procedures = null;
-        procedureForm.setProcedureDefLOVs(this.listOfValueRepository.findByLovType("PROCEDURE_DEF"));
+        procedureForm.setProcedureDefLOVs(this.getListOfValues(attendanceID, "PROCEDURE_DEF"));
         if (requestID > 0) {
             procedures = this.procedureRepository.findByRequestID(requestID);
             if (procedures != null && procedures.size() > 0) {
-                List<ListOfValue> procLovs = this.listOfValueRepository.findByLovType("PROCEDURE_DEF");
+                List<ListOfValue> procLovs = this.getListOfValues(attendanceID, "PROCEDURE_DEF");
                 procedures = procedures.stream().map(p -> {
                     for (ListOfValue lov : procLovs) {
                         if (lov.getLovID() == p.getLovTypeLovID()) {
@@ -808,6 +822,7 @@ this.attendanceService.updateAttendance(request.getAttendanceID(), AttendanceSta
 
     public void saveProcedure(ProcedureForm procedureForm, UserPrincipal user) {
         Request request = null;
+        int attendanceID = procedureForm.getAttendanceID();
         if (procedureForm.getRequestID() > 0) {
             request = getRequest(procedureForm.getRequestID());
         } else {
@@ -815,9 +830,10 @@ this.attendanceService.updateAttendance(request.getAttendanceID(), AttendanceSta
         }
         List<Procedure> oldProcedures = this.procedureRepository.findByRequestID(procedureForm.getRequestID());
 
-        List<Procedure> procedures = convertToProcedures(procedureForm.getSelectedLovs(), oldProcedures);
+        List<Procedure> procedures = convertToProcedures(procedureForm.getSelectedLovs(), oldProcedures, attendanceID);
 
-        List<ListOfValue> procLovs = this.listOfValueRepository.findByLovType("PROCEDURE_DEF");
+        List<ListOfValue> procLovs = this.getListOfValues(attendanceID, "PROCEDURE_DEF");
+                //this.listOfValueRepository.findByLovType("PROCEDURE_DEF");
 
         for (int i = 0; i < procLovs.size(); i++) {
             int labRowID = procLovs.get(i).getRowID();
@@ -860,7 +876,7 @@ this.attendanceService.updateAttendance(request.getAttendanceID(), AttendanceSta
         request.setChargeable(true);
         request.setAmountCharged(procedures.stream().map(e -> e.getChargeAmount()).reduce(Double.valueOf(0), Double::sum));
         this.saveRequest(request);
-this.attendanceService.updateAttendance(request.getAttendanceID(), AttendanceStatus.Active);
+        this.attendanceService.updateAttendance(request.getAttendanceID(), AttendanceStatus.Active);
         for (Procedure procedure : procedures) {
             procedure.setRequestID(request.getRowID());
             procedure.setAttendanceID(request.getAttendanceID());
@@ -891,11 +907,12 @@ this.attendanceService.updateAttendance(request.getAttendanceID(), AttendanceSta
         this.attendanceService.updateAttendance(request.getAttendanceID(), AttendanceStatus.Active);
     }
 
-    public List<Procedure> convertToProcedures(List<Integer> selectedLovs, List<Procedure> procedures) {
+    public List<Procedure> convertToProcedures(List<Integer> selectedLovs, List<Procedure> procedures, int attendanceID) {
         if (procedures == null) {
             procedures = new ArrayList<>();
         }
-        List<ListOfValue> lovs = this.listOfValueRepository.findByLovType("PROCEDURE_DEF");
+        List<ListOfValue> lovs = this.getListOfValues(attendanceID, "PROCEDURE_DEF");
+        //this.listOfValueRepository.findByLovType("PROCEDURE_DEF");
 
         List<Integer> oldLovs = procedures.stream().map(p -> p.getLovTypeLovID()).collect(Collectors.toList());
 
@@ -956,6 +973,8 @@ this.attendanceService.updateAttendance(request.getAttendanceID(), AttendanceSta
             });
             return p;
         }).collect(Collectors.toList());
+        
+        prescriptions.forEach(p -> {if (p.getChargeAmount() < 0){p.setChargeAmount(-1);p.setQuantity(0); }});
 
         prescriptions.forEach(p -> {
             this.prescriptionRepository.save(p);
@@ -963,8 +982,10 @@ this.attendanceService.updateAttendance(request.getAttendanceID(), AttendanceSta
         request.setUpdated(Timestamp.from(Instant.now()));
         request.setUpdatedBy(user.getRowID());
 
-        request.setAmountCharged(prescriptions.stream().mapToDouble(p -> p.getChargeAmount()).sum());
-
+        request.setAmountCharged(prescriptions.stream().filter(p -> p.getChargeAmount() > 0).mapToDouble(p -> p.getChargeAmount()).sum());
+        if (request.getAmountCharged() == 0) {
+            request.setAmountCharged(100000);
+        }
         this.saveRequest(request);
 
     }
@@ -1010,6 +1031,7 @@ this.attendanceService.updateAttendance(request.getAttendanceID(), AttendanceSta
         icharge.addAll(prescriptionForm.getPrescriptionList());
 
         this.chargeService.addCharges(icharge, prescriptionForm.getAttendanceID(), "PRESCRIPTION");
+        prescriptionForm.getPrescriptionList().forEach(p -> p.setChargeAmount(p.getChargeAmount() * p.getQuantity()));
         request.setAttendanceID(prescriptionForm.getAttendanceID());
         request.setPaid(false);
         request.setRecordStatus(RecordStatus.ACTIVE);
@@ -1018,18 +1040,19 @@ this.attendanceService.updateAttendance(request.getAttendanceID(), AttendanceSta
                 .findFirst()
                 .map(e -> e.getLovID())
                 .get();
+        
         request.setRequestType(requestType);
         request.setCreated(LocalDateTime.now());
         request.setUpdated(LocalDateTime.now());
         request.setCreatedBy(user.getRowID());
         request.setUpdatedBy(user.getRowID());
         request.setAmountCharged(prescriptionForm.getPrescriptionList().stream().map(e -> e.getChargeAmount()).reduce(Double.valueOf(0), Double::sum));
-        if (request.getAmountCharged() > 0) {
+        if (request.getAmountCharged() == 0) {
             request.setAmountCharged(100000);
         }
         request.setChargeable(true);
         this.saveRequest(request);
-this.attendanceService.updateAttendance(request.getAttendanceID(), AttendanceStatus.Active);
+        this.attendanceService.updateAttendance(request.getAttendanceID(), AttendanceStatus.Active);
         for (Prescription prescription : prescriptionForm.getPrescriptionList()) {
             prescription.setRequestID(request.getRowID());
             prescription.setAttendanceID(request.getAttendanceID());
@@ -1056,12 +1079,12 @@ this.attendanceService.updateAttendance(request.getAttendanceID(), AttendanceSta
         radiologyForm.setAttendanceID(attendanceID);
         radiologyForm.setRequestID(requestID);
         List<Radiology> radiologyList = null;
-        radiologyForm.setRadiologyDefLOVs(this.listOfValueRepository.findByLovType("RADIOLOGY_DEF"));
+        radiologyForm.setRadiologyDefLOVs(this.getListOfValues(attendanceID, "RADIOLOGY_DEF"));
         if (requestID > 0) {
             radiologyList = this.radiologyRepository.findByRequestID(requestID);
 
             if (radiologyList != null && radiologyList.size() > 0) {
-                List<ListOfValue> radLovs = this.listOfValueRepository.findByLovType("RADIOLOGY_DEF");
+                List<ListOfValue> radLovs = this.getListOfValues(attendanceID, "RADIOLOGY_DEF");
                 radiologyList = radiologyList.stream().map(p -> {
                     for (ListOfValue lov : radLovs) {
                         if (lov.getLovID() == p.getLovTypeLovID()) {
@@ -1100,7 +1123,7 @@ this.attendanceService.updateAttendance(request.getAttendanceID(), AttendanceSta
             List<ICharges> icharge = new ArrayList<>();
             icharge.addAll(radiologyForm.getRadiologyList());
 
-            this.chargeService.addCharges(icharge, radiologyForm.getAttendanceID(), "RADIOLOGY");
+            this.chargeService.addCharges(icharge, radiologyForm.getAttendanceID(), "RADIOLOGY_DEF");
             request.setAttendanceID(radiologyForm.getAttendanceID());
             request.setPaid(false);
             request.setRecordStatus(RecordStatus.ACTIVE);

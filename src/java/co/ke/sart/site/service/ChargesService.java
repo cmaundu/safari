@@ -6,14 +6,21 @@
 package co.ke.sart.site.service;
 
 import co.ke.sart.site.entity.ChargeMatrix;
+import co.ke.sart.site.entity.PaymentMode;
 import co.ke.sart.site.interfaces.ICharges;
 import co.ke.sart.site.model.Attendance;
+import co.ke.sart.site.model.ChargeDisplay;
 import co.ke.sart.site.repository.ChargeMatrixRepository;
+import co.ke.sart.site.repository.PaymentModeRepository;
+import co.ke.sart.site.repository.ReportRepository;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -24,6 +31,50 @@ public class ChargesService {
 
     @Autowired
     AttendanceService attendanceService;
+
+    @Autowired
+    PaymentModeRepository paymentModeRepository;
+
+    @Autowired
+    private ApplicationContext appContext;
+
+    public Map<String, Object> getCharges(String lovType) {
+        ReportRepository reportRepository = appContext.getBean("reportRepository", ReportRepository.class);
+        Map<String, Object> modelAttributes = new TreeMap<>();
+        String dbLovType = "";
+        switch (lovType) {
+            case "procedure":
+                dbLovType = "PROCEDURE_DEF";
+                modelAttributes.put("title", "Procedures");
+                break;
+            case"labtest":
+                dbLovType = "LAB_TEST";
+                modelAttributes.put("title", "Lab Tests");
+                break;                        
+            case"radiology":
+                dbLovType = "RADIOLOGY_DEF";
+                modelAttributes.put("title", "Radiologies");
+                break;  
+            case"attendance":
+                dbLovType = "ATTENDANCE_TYPE";
+                modelAttributes.put("title", "Attendances");
+                break;    
+            case"prescription":
+                dbLovType = "PRESCRIPTION";
+                modelAttributes.put("title", "Drugs");
+                break;                    
+        }
+
+        ChargeDisplay cd = new ChargeDisplay();
+        cd.setCdList(reportRepository.getChargeMatrix(dbLovType));
+        cd.generateRows();
+        modelAttributes.put("cdlist", cd);
+
+        List<PaymentMode> paymentModes = this.toList(paymentModeRepository.findAll());
+        paymentModes.sort((a, b) ->  a.getName().compareTo(b.getName()));
+        modelAttributes.put("pmlist", paymentModes);
+        return modelAttributes;
+    }
 
     public List<ChargeMatrix> getChargeMatrix(String lovType, List<Integer> lovTypeIDs, int paymentMode) {
         List<ChargeMatrix> matrices = chargeMatrixRepository.findByLovTypeAndLovTypeIDInAndPaymentMode(lovType, lovTypeIDs, paymentMode);

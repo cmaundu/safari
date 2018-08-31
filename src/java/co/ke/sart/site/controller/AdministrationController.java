@@ -6,6 +6,7 @@ import co.ke.sart.site.form.LabTestForm;
 import co.ke.sart.site.form.RoleForm;
 import co.ke.sart.site.form.UserForm;
 import co.ke.sart.site.model.Patient;
+import co.ke.sart.site.service.ChargesService;
 import co.ke.sart.site.service.UserService;
 import co.ke.sart.site.utils.FormAction;
 import java.security.Principal;
@@ -26,7 +27,6 @@ import org.springframework.web.servlet.ModelAndView;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 
-
 @WebController
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 @RequestMapping("administration")
@@ -35,26 +35,41 @@ public class AdministrationController {
     @Autowired
     UserService userService;
 
-    @RequestMapping(value = {"**","user*","user**", "user/list"}, method = RequestMethod.GET)
-    public String userList(Model model) {
+    @Autowired
+    ChargesService chargesService;
+
+    @RequestMapping(value = {"**", "*"}, method = RequestMethod.GET)
+    @PreAuthorize("hasRole('ROLE_VIEW_USER')")
+    public String homePage(Model model) {
         model.addAttribute("users", this.userService.getAllUsers());
 
-        return "user/list";
+        return "configuration/index";
     }
-    
+
+    @RequestMapping(value = {"user*", "user**", "user/list"}, method = RequestMethod.GET)
+    @PreAuthorize("hasRole('ROLE_VIEW_USER')")
+    public String userList(Model model) {
+        model.addAttribute("users", this.userService.getAllUsers());
+        model.addAttribute("role", "userlist");
+        model.addAttribute("userlist", "userlist");
+        return "configuration/index";
+    }
+
     @RequestMapping(value = {"role*", "role/list"}, method = RequestMethod.GET)
+    @PreAuthorize("hasRole('ROLE_VIEW_USER')")
     public String roleList(Model model) {
         model.addAttribute("roles", this.userService.getAllRoles());
-
-        return "role/list";
-    }    
+        model.addAttribute("role", "rolelist");
+        model.addAttribute("rolelist", "rolelist");
+        return "configuration/index";
+    }
 
     @RequestMapping(value = {"user/add"}, method = RequestMethod.GET)
     @PreAuthorize("hasRole('ROLE_ADD_USER')")
     public String userAdd(Model model) {
         model.addAttribute("userForm", this.userService.prepareUserForm(0, FormAction.NEW));
 
-        return "user/add";
+        return "configuration/user/add";
     }
 
     @RequestMapping(value = {"role/edit/{rowID}"}, method = RequestMethod.GET)
@@ -62,22 +77,23 @@ public class AdministrationController {
     public String roleEdit(Model model, @PathVariable("rowID") int rowID) {
         model.addAttribute("roleForm", this.userService.prepareRoleForm(rowID, FormAction.EDIT));
 
-        return "role/add";
-    }    
-    
+        return "configuration/role/add";
+    }
+
     @RequestMapping(value = {"role/add"}, method = RequestMethod.GET)
+    @PreAuthorize("hasRole('ROLE_ADD_USER')")
     public String roleAdd(Model model) {
         model.addAttribute("roleForm", this.userService.prepareRoleForm(0, FormAction.NEW));
 
-        return "role/add";
+        return "configuration/role/add";
     }
-  
-        @RequestMapping(value = {"role/add", "role/edit"}, method = RequestMethod.POST)
-        @PreAuthorize("hasRole('ROLE_EDIT_ROLE')")
+
+    @RequestMapping(value = {"role/add", "role/edit"}, method = RequestMethod.POST)
+    @PreAuthorize("hasRole('ROLE_EDIT_ROLE')")
     public ModelAndView roleSave(Principal principal, @Valid @ModelAttribute("roleForm") RoleForm roleForm, BindingResult result) {
         if (result.hasErrors()) {
             return new ModelAndView("/user/add");
-        }  else if (roleForm.getRole().getRoleName().isEmpty()) {
+        } else if (roleForm.getRole().getRoleName().isEmpty()) {
 
             ObjectError error = new ObjectError("roleForm.role.roleName", "Rolename cannot be empty. Please provide a name");
             result.addError(error);
@@ -87,7 +103,7 @@ public class AdministrationController {
 
             return rxView;
         }
-        
+
         this.userService.saveRole((UserPrincipal) principal, roleForm);
 
         return new ModelAndView("redirect:/administration/role/");
@@ -97,11 +113,10 @@ public class AdministrationController {
     @PreAuthorize("hasRole('ROLE_EDIT_PASSWD')")
     public String userPasswordReset(Model model, @PathVariable("rowID") int rowID, HttpServletRequest request) {
         model.addAttribute("userForm", this.userService.prepareUserForm(rowID, FormAction.PASSWORDCHANGE));
-        System.out.println("Has Role "+ request.isUserInRole("EDIT_PASSW"));
-        System.out.println("Has Role "+ request.isUserInRole("ADD_USER"));
+        System.out.println("Has Role " + request.isUserInRole("EDIT_PASSW"));
+        System.out.println("Has Role " + request.isUserInRole("ADD_USER"));
 
-        
-        return "user/passwordedit";
+        return "configuration/user/passwordedit";
     }
 
     @RequestMapping(value = {"user/edit/{rowID}"}, method = RequestMethod.GET)
@@ -109,7 +124,7 @@ public class AdministrationController {
     public String userEdit(Model model, @PathVariable("rowID") int rowID) {
         model.addAttribute("userForm", this.userService.prepareUserForm(rowID, FormAction.EDIT));
 
-        return "user/edit";
+        return "configuration/user/edit";
     }
 
     @RequestMapping(value = {"user/add", "user/edit"}, method = RequestMethod.POST)
@@ -132,7 +147,7 @@ public class AdministrationController {
     }
 
     @RequestMapping(value = {"user/passwordedit"}, method = RequestMethod.POST)
-    @PreAuthorize("hasRole('PASSWD_ROLE')")
+    @PreAuthorize("hasRole('ROLE_EDIT_PASSWD')")
     public ModelAndView userPasswordResetSave(Principal principal, @Valid @ModelAttribute("userForm") UserForm userForm, BindingResult result) {
         if (result.hasErrors()) {
             return new ModelAndView("/user/add");
@@ -158,6 +173,16 @@ public class AdministrationController {
         this.userService.saveUser((UserPrincipal) principal, userForm);
 
         return new ModelAndView("redirect:/administration/user/");
+    }
+
+    @RequestMapping(value = {"charges/{paymentMode}"}, method = RequestMethod.GET)
+    @PreAuthorize("hasRole('ROLE_VIEW_ADMIN')")
+    public String listChargeMatrix(Model model, @PathVariable("paymentMode") String paymentMode) {
+        //model.addAttribute("userForm", this.userService.prepareUserForm(rowID, FormAction.EDIT));
+        model.addAllAttributes(chargesService.getCharges(paymentMode));
+        model.addAttribute("role", "chargelist");
+        model.addAttribute("chargelist", "chargelist");
+        return "configuration/index";
     }
 
 }

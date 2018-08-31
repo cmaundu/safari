@@ -24,12 +24,42 @@
             <div class="titletextright"> <spring:message code="sart.title.top" /> </div>
             <div class="titletextleft"> ${title} Welcome ${pageContext.request.userPrincipal} | <a href="<c:url value="/logout"/>">Logout</a> </div>
         </div>
+    <!--    
+    <aside class="main-sidebar">
+        <section class="sidebar">
+            <div class="user-panel">
+
+            </div>
+            <ul class="sidebar-menu" data-widget="tree">
+                <li class="header">MAIN NAVIGATION</li>
+                <li class="active treeview">
+                    <a href="#">
+                        <i class="fa fa-dashboard"></i> <span>Dashboard</span>
+                        <span class="pull-right-container">
+                            <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                    </a>
+                    <ul class="treeview-menu">
+                        <li class="active"><a href="index.html"><i class="fa fa-circle-o"></i> Dashboard v1</a></li>
+                        <li><a href="index2.html"><i class="fa fa-circle-o"></i> Dashboard v2</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </section>
+    </aside>
+    -->
     <div class="mainbody">
         <div class="sidebarmain"> 
             <a href="<c:url value="/dashboard" />" class="nodeco">
                 <div class="sidemenuitem">
                     <div class="sidemenuimg"> <img src="<c:url value="/resources/images/icon_three_dot.png" />" /> </div>
                     <div class="sidemenutxt"> <spring:message code="sart.title.dashboard" /> </div>
+                </div>
+            </a>
+            <a href="<c:url value="/courier/list" />" class="nodeco">
+                <div class="sidemenuitem">
+                    <div class="sidemenuimg"> <img src="<c:url value="/resources/images/icon_three_dot.png" />" /> </div>
+                    <div class="sidemenutxt"> <spring:message code="sart.title.courier" /> </div>
                 </div>
             </a>
             <a href="<c:url value="/patient/" />" class="nodeco">
@@ -76,6 +106,7 @@
 
         </div>
         <div class="sart-work-area" id="work-area" name="work-area"> 
+            
             <jsp:invoke fragment="content"></jsp:invoke>
         </div>
     </div>

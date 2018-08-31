@@ -4,8 +4,11 @@
 <mt:master>
     <jsp:attribute name="content">
         <div class="att-screen-main">
-            <div class="sart-att-request-list">  
+            <div class="sart-record-banner">
                 <span class="sart-title">Daily Summaries</span>
+                <a href="<c:url value="/reports/" />" class="btn btn-result" data-toggle="modal" data-target="#myModal"><i class="fa fa-plus"></i> Daily Summaries</a>
+                <a href="<c:url value="/reports/rx" />" class="btn btn-view" data-toggle="modal" data-target="#myModal"><i class="fa fa-plus"></i> Prescription</a>
+            </div>
                 <table class="sart-report-table">
                     <tbody>
                         <tr>
@@ -30,8 +33,7 @@
                             </tr>
                         </c:forEach>
 
-                </table>
-            </div>           
+                </table>         
         </div>
     </jsp:attribute>
 </mt:master>

@@ -32,4 +32,13 @@ public class ReportController {
         return "report/daily_summary";
     }
     
+    @RequestMapping(value = {"rx","rx/**"}, method = RequestMethod.GET)
+    public String rxReport(Model model) {
+        
+        Map<String,Object> rx = reportService.getRxReport(0);
+        model.addAllAttributes(rx);
+
+        return "report/rxDaily";
+    }    
+    
 }
